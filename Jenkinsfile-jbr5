@@ -48,5 +48,24 @@ pipeline {
                     }
                 }
             }
+            stage("commit version update") {
+                steps {
+                    script {
+                        withCredentials(credentialsId: 'gitlab-credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                            sh 'git config user.email "josmbrio@gmail.com"'
+                            sh 'git config user.name "josmbrio"'
+
+                            sh 'git status'
+                            sh 'git branch'
+                            sh 'git config --list'
+
+                            sh 'git remote set-url origin https://${USER}:${PASS}@192.168.100.6/josmbrio/java-maven-app.git'
+                            sh 'git add .'
+                            sh 'git commit -m "This is from Jenkins version bump"'
+                            sh 'git push origin HEAD:jenkins-jobs2'
+                        }
+                    }
+                }
+            }
         }
 }
