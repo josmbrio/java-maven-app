@@ -14,7 +14,7 @@ pipeline {
                             // El nombre debe ser igual al nombre configurado en la Configuracion Global de Jenkins
         }
         environment {
-            IMAGE_NAME = 'josmbrio/my-repo:jma-2.0
+            IMAGE_NAME = 'josmbrio/my-repo:jma-2.0'
         }
         stages {
             stage("build app") {
