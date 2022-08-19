@@ -2,6 +2,11 @@
 
 pipeline {
         agent any
+
+        environment {
+            SERVER_DEPLOY_KEY = 'deploy-server-key'
+            SERVER_LOGIN = 'josmbrio@192.168.56.101'
+        }
         
         stages {
             stage("build app") {
@@ -23,10 +28,13 @@ pipeline {
                 steps {
                     script {
                         echo 'deploying the application...'
+                        
 
-                        def dockerCmd = 'docker run -p 3000:3080 -d josmbrio/my-repo:rne-1.0'
-                        sshagent(['ec2-server-key']) {
-                            sh "ssh -o StrictHostKeyChecking=no ec2-user@174.129.85.192	${dockerCmd}"
+                        def dockerComposeCmd = 'docker-compose -f docker-compose.yaml up -d'
+                        //sshagent(['ec2-server-key']) {
+                        sshagent([${SERVER_DEPLOY_KEY}])  {
+                            sh "scp docker-compose.yaml ${SERVER_LOGIN}:/home/josmbrio/
+                            sh "ssh -o StrictHostKeyChecking=no ${SERVER_LOGIN}	${dockerCmd}"
                         }
                     }
                 }
