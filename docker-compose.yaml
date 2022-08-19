@@ -4,9 +4,9 @@ services:
         image: josmbrio/my-repo:jma-2.0
         ports:
             - 8080:8080
-        postgres:
-            image: postgres:latest
-            port:
-                5432:5432
-            environment:
-                - POSTGRES_PASSWORD: my-pass
+    postgres:
+        image: postgres:latest
+        port:
+            - 5432:5432
+        environment:
+            - POSTGRES_PASSWORD: my-pass
