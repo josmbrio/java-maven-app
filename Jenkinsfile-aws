@@ -40,9 +40,10 @@ pipeline {
                 steps {
                     script {
                         echo "deploying docker image to EC2 or localserver"
-                        def dockerComposeCmd = 'docker-compose -f docker-compose.yaml up -d'
+                        def shellCmd = 'bash server-cmds.sh'
                         
                         sshagent(["${SERVER_DEPLOY_KEY}"])  {
+                            sh "scp server-cmds.sh ${SERVER_LOGIN}:/home/josmbrio/"
                             sh "scp docker-compose.yaml ${SERVER_LOGIN}:/home/josmbrio/"
                             sh "ssh -o StrictHostKeyChecking=no ${SERVER_LOGIN}	${dockerComposeCmd}"
                         }
