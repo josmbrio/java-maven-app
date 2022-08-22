@@ -11,7 +11,7 @@ pipeline {
         agent any
         tools {
             maven 'maven-3.8.6'   // Con esto maven estara disponible en todo el pipeline.
-                            // El nombre debe ser igual al nombre configurado en la Configuracion Global de Jenkins
+                            // El nombre debe ser igual al nombre configurado en la Configuracion Global de Jenkins.
         }
         environment {
             IMAGE_NAME = 'josmbrio/my-repo:jmaNEW-2.0'
