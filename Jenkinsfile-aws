@@ -45,7 +45,7 @@ pipeline {
                         sshagent(["${SERVER_DEPLOY_KEY}"])  {
                             sh "scp server-cmds.sh ${SERVER_LOGIN}:/home/josmbrio/"
                             sh "scp docker-compose.yaml ${SERVER_LOGIN}:/home/josmbrio/"
-                            sh "ssh -o StrictHostKeyChecking=no ${SERVER_LOGIN}	${dockerComposeCmd}"
+                            sh "ssh -o StrictHostKeyChecking=no ${SERVER_LOGIN}	${shellCmd}"
                         }
                     }
                 }
