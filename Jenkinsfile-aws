@@ -14,16 +14,30 @@ pipeline {
                             // El nombre debe ser igual al nombre configurado en la Configuracion Global de Jenkins.
         }
         environment {
-            IMAGE_NAME = 'josmbrio/my-repo:jmaNEW-2.0'
-            SERVER_DEPLOY_KEY = 'deploy-server-key'
-            SERVER_LOGIN = 'josmbrio@192.168.56.101'
+            DEPLOY_SERVER_KEY = 'deploy-server-key'
+            DEPLOY_SERVER_LOGIN = 'josmbrio@deploy-server'
+            GITLAB_SERVER = 'myserver'
         }
         stages {
+            stage("increment version") {
+                steps {
+                    script {
+                        echo "incrementing app version"
+                        sh 'mvn build-helper:parse-version versions:set \
+                            -DnewVersion=\\\${parsedVersion.majorVersion}.\\\${parsedVersion.minorVersion}.\\\${parsedVersion.nextIncrementalVersion} \
+                            versions:commit'
+                        def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
+                        def version = matcher[0][1]
+                        env.IMAGE_NAME = "$version-$BUILD_NUMBER"
+                    }
+                }
+            }
             stage("build app") {
                 steps {
                     script {
                         echo "building application jar..."
-                        buildJar()
+                        //buildJar()
+                        sh 'mvn clean package'
                     }
                 }
             }
@@ -42,10 +56,29 @@ pipeline {
                         echo "deploying docker image to EC2 or localserver"
                         def shellCmd = 'bash server-cmds.sh ${IMAGE_NAME}'
                         
-                        sshagent(["${SERVER_DEPLOY_KEY}"])  {
-                            sh "scp server-cmds.sh ${SERVER_LOGIN}:/home/josmbrio/"
-                            sh "scp docker-compose.yaml ${SERVER_LOGIN}:/home/josmbrio/"
-                            sh "ssh -o StrictHostKeyChecking=no ${SERVER_LOGIN}	${shellCmd}"
+                        sshagent(["${DEPLOY_SERVER_KEY}"])  {
+                            sh "scp server-cmds.sh ${DEPLOY_SERVER_LOGIN}:/home/josmbrio/"
+                            sh "scp docker-compose.yaml ${DEPLOY_SERVER_LOGIN}:/home/josmbrio/"
+                            sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER_LOGIN}	${shellCmd}"
+                        }
+                    }
+                }
+            }
+            stage("commit version update") {
+                steps {
+                    script {
+                        withCredentials([usernamePassword(credentialsId: 'gitlab-credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                            //sh 'git config user.email "jenkins@example.com"'
+                            //sh 'git config user.name "jenkins"'
+
+                            //sh 'git status'
+                            //sh 'git branch'
+                            //sh 'git config --list'
+
+                            sh 'git remote set-url origin https://${USER}:${PASS}@${GITLAB_SERVER}/josmbrio/java-maven-app.git'
+                            sh 'git add .'
+                            sh 'git commit -m "This is from Jenkins version bump"'
+                            sh 'git push origin HEAD:jenkins-job2'
                         }
                     }
                 }
