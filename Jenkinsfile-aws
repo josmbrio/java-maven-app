@@ -19,6 +19,13 @@ pipeline {
             GITLAB_SERVER = 'myserver'
         }
         stages {
+            stage("init") {
+                steps {
+                    script {
+                        gv = load "script-3.groovy"
+                    }
+                }
+            }
             stage("increment version") {
                 steps {
                     script {
@@ -35,7 +42,7 @@ pipeline {
             stage("build app") {
                 steps {
                     script {
-                        echo "building application jar..."
+                        gv.message()
                         //buildJar()
                         sh 'mvn clean package'
                     }
