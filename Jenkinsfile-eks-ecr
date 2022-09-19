@@ -7,8 +7,8 @@ pipeline {
                             // El nombre debe ser igual al nombre configurado en la Configuracion Global de Jenkins
         }
   environment {
-      REPO_SERVER: '178762446524.dkr.ecr.us-east-1.amazonaws.com'
-      REPO_URL: "${REPO_SERVER}/java-maven-app"
+      REPO_SERVER = '178762446524.dkr.ecr.us-east-1.amazonaws.com'
+      REPO_URL = "${REPO_SERVER}/java-maven-app"
   }
 
   stages {
