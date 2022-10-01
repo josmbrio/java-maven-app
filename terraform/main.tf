@@ -11,7 +11,7 @@ resource "aws_vpc" "myapp-vpc" {
 }
 
 resource "aws_subnet" "myapp-subnet-1" {
-  vpc_id = var.vpc_id
+  vpc_id = aws_vpc.myapp-vpc.id
   cidr_block = var.subnet_cidr_block
   availability_zone = var.avail_zone
   tags = {
@@ -20,14 +20,14 @@ resource "aws_subnet" "myapp-subnet-1" {
 }
  
 resource "aws_internet_gateway" "myapp-igw" {
-  vpc_id = var.vpc_id
+  vpc_id = aws_vpc.myapp-vpc.id
   tags = {
     Name = "${var.env_prefix}-igw"
   }
 }
 
 resource "aws_default_route_table" "main-rtb" {
-  default_route_table_id = var.default_route_table_id
+  default_route_table_id = aws_vpc.myapp-vpc.default_route_table_id
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.myapp-igw.id
@@ -81,34 +81,14 @@ resource "aws_instance" "myapp-server" {
   ami = data.aws_ami.latest-amazon-linux-image.id
   instance_type = var.instance_type
 
-  subnet_id = module.myapp-subnet.subnet.id
+  subnet_id = aws_subnet.myapp-subnet-1.id
   vpc_security_group_ids = [aws_default_security_group.default-sg.id]
   availability_zone = var.avail_zone
 
   associate_public_ip_address = true
-  key_name = aws_key_pair.ssh-key.key_name
+  key_name = "myapp-key-pair"
 
   user_data = file("entry-script.sh")
-
-  connection {
-    type = "ssh"
-    host = self.public_ip
-    user = "ec2-user"
-    private_key = ""myapp-key-pair""
-  }
-
-  provisioner "file" {
-    source = "entry-script.sh"
-    destination = "/home/ec2-user/entry-script-on-ec2.sh"
-  }
-
-  provisioner "remote-exec" {
-    script = file("entry-script-on-ec2.sh")
-  }
-
-  provisioner "local-exec" {
-    command = "echo ${self.public_ip} > output.txt"
-  }
 
   tags = {
     Name = "${var.env_prefix}-server"
