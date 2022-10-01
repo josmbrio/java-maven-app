@@ -72,9 +72,6 @@ pipeline {
                                 script: "terraform output ec2_public_ip",
                                 returnStdout: true
                             ).toString().trim()
-                            
-                            echo "showing variable in provision stage"
-                            echo "${EC2_PUBLIC_IP}" 
                         }   
                         
                     }
@@ -90,7 +87,6 @@ pipeline {
 
                         echo "deploying docker image to EC2 or localserver"
                         echo "${EC2_PUBLIC_IP}"
-                        echo "${NEW_VAR}"
 
                         def shellCmd = 'bash server-cmds.sh ${IMAGE_NAME}'
                         def ec2Instance = "ec2-user@${EC2_PUBLIC_IP}"
