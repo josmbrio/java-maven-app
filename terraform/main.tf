@@ -4,6 +4,7 @@ terraform {
     bucket = "myapp-bucket-jbr"
     key = "myapp/state.tfstate" 
     region = "us-east-1"
+  }
 }
 
 # Module root main.tf
